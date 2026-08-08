@@ -177,6 +177,9 @@ async function askHomeOpsAI(message) {
 
   if (!q) return;
 
+    const oldCsat = document.getElementById('csatPrompt');
+if (oldCsat) oldCsat.remove();
+
   addMsg(q, 'user');
   inp.value = '';
 
@@ -226,6 +229,7 @@ ${q}`
     };
 
     updateCaseBox();
+    addCsatPrompt();
 
   } catch (error) {
     console.error(error);
@@ -241,7 +245,49 @@ ${q}`
   }
 }
 document.getElementById('sendBtn').onclick=send;document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{document.getElementById('chatInput').value=b.dataset.q;send()});
-function updateCaseBox() {
+
+  function addCsatPrompt() {
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.id = 'csatPrompt';
+
+  d.innerHTML = `
+    <div style="margin-bottom:8px;font-weight:600">
+      Was this response helpful?
+    </div>
+
+    <div style="display:flex;gap:6px">
+      <button class="btn secondary" onclick="rateCsat(1)">1 ⭐</button>
+      <button class="btn secondary" onclick="rateCsat(2)">2 ⭐</button>
+      <button class="btn secondary" onclick="rateCsat(3)">3 ⭐</button>
+      <button class="btn secondary" onclick="rateCsat(4)">4 ⭐</button>
+      <button class="btn secondary" onclick="rateCsat(5)">5 ⭐</button>
+    </div>
+  `;
+
+  document.getElementById('messages').appendChild(d);
+  d.scrollIntoView({ behavior: 'smooth' });
+}
+
+
+function rateCsat(score) {
+  if (!currentCase) return;
+
+  currentCase.csat = score;
+
+  const prompt = document.getElementById('csatPrompt');
+
+  if (prompt) {
+    prompt.innerHTML = `
+      <b>Thanks for the feedback.</b>
+      <div class="small" style="margin-top:5px">
+        CSAT recorded: ${score}/5
+      </div>
+    `;
+  }
+}
+  
+  function updateCaseBox() {
   if (!currentCase) return;
 
   const b = document.getElementById('caseBox');
