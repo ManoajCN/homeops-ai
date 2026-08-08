@@ -134,6 +134,9 @@ const seedCases = [
 let cases = [];
 seedCases.forEach(([cat,n,esc,csat,aht])=>{for(let i=0;i<n;i++)cases.push({cat,esc:i<esc,csat:Math.max(1,Math.min(5,csat+((i%3)-1)*.2)),aht:aht+((i%4)-1.5)*.25,res:i>=esc});});
 let currentCase=null;
+  let liveCases = JSON.parse(
+  localStorage.getItem('homeopsLiveCases') || '[]'
+);
 const titles={support:['Student Support AI','Turn housing questions into structured cases, resolutions and operational insight.'],dashboard:['Marketplace Operations Dashboard','See resolution quality, workload, escalation patterns and knowledge gaps.'],product:['Product & Tech Priorities','Turn recurring customer pain points into clear requirements and priorities.'],model:['Operating Model','Compare workflows across locations and propose one scalable standard.'],brief:['Weekly Ops Brief','Give managers a concise, data-led view of what changed and what to do next.'],about:['About Prototype','Independent portfolio project using public sources and synthetic operational data.']};
 
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');document.getElementById('pageTitle').textContent=titles[b.dataset.tab][0];document.getElementById('pageSub').textContent=titles[b.dataset.tab][1]; if(b.dataset.tab==='dashboard')renderDashboard(); if(b.dataset.tab==='product')renderBacklog(); if(b.dataset.tab==='brief')renderBrief();});
@@ -206,6 +209,9 @@ ${q}`
     addMsg(result.reply, 'bot', meta);
 
     currentCase = {
+      question: q,
+brand: brand,
+createdAt: new Date().toISOString(),
       cat: result.category || 'Other',
       p: result.priority || 'Medium',
       conf: Number(result.confidence || 0),
@@ -247,6 +253,39 @@ ${q}`
 }
 document.getElementById('sendBtn').onclick=send;document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{document.getElementById('chatInput').value=b.dataset.q;send()});
 
+function saveLiveCase() {
+  if (!currentCase) return;
+
+  const liveCase = {
+    question: currentCase.question,
+    brand: currentCase.brand,
+    category: currentCase.cat,
+    priority: currentCase.p,
+    confidence: currentCase.conf,
+    escalated: currentCase.esc,
+    route: currentCase.route,
+    escalationReason: currentCase.reason,
+    nextAction: currentCase.next,
+    csat: currentCase.csat,
+    createdAt: currentCase.createdAt
+  };
+
+  const existingIndex = liveCases.findIndex(
+    x => x.createdAt === liveCase.createdAt
+  );
+
+  if (existingIndex >= 0) {
+    liveCases[existingIndex] = liveCase;
+  } else {
+    liveCases.push(liveCase);
+  }
+
+  localStorage.setItem(
+    'homeopsLiveCases',
+    JSON.stringify(liveCases)
+  );
+}
+  
   function addCsatPrompt() {
   const d = document.createElement('div');
   d.className = 'msg bot';
@@ -275,6 +314,7 @@ function rateCsat(score) {
   if (!currentCase) return;
 
   currentCase.csat = score;
+  saveLiveCase();
 
   const prompt = document.getElementById('csatPrompt');
 
