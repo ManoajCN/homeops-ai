@@ -194,17 +194,14 @@ Student question:
 ${q}`
     );
 
-    // Metadata shown underneath the AI response
     const meta = {
       c: result.category || 'Other',
       p: result.priority || 'Medium',
       conf: Number(result.confidence || 0)
     };
 
-    // Show the real Gemini response
     addMsg(result.reply, 'bot', meta);
 
-    // Build the operations case using Gemini classification
     currentCase = {
       cat: result.category || 'Other',
       p: result.priority || 'Medium',
