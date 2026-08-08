@@ -169,7 +169,7 @@ async function askHomeOpsAI(message) {
     throw new Error(data.error || "AI request failed");
   }
 
-  return data.reply;
+  return data;
 }
   async function send() {
   const inp = document.getElementById('chatInput');
@@ -177,42 +177,55 @@ async function askHomeOpsAI(message) {
 
   if (!q) return;
 
-  // Show student's message
   addMsg(q, 'user');
   inp.value = '';
 
   const brand = document.getElementById('brandSelect').value;
   const sendBtn = document.getElementById('sendBtn');
 
-  // Keep existing classification temporarily for dashboard metadata.
-  // We will replace this with AI classification in the next upgrade.
-  const r = classify(q, brand);
-
   try {
     sendBtn.disabled = true;
     sendBtn.textContent = 'Thinking...';
 
-    // Send the real question to Gemini through the secure Cloudflare Worker
-    const aiReply = await askHomeOpsAI(
+    const result = await askHomeOpsAI(
       `Student housing platform context: ${brand}
 
 Student question:
 ${q}`
     );
 
-    // Display Gemini's real response
-    addMsg(aiReply, 'bot', r);
+    // Metadata shown underneath the AI response
+    const meta = {
+      c: result.category || 'Other',
+      p: result.priority || 'Medium',
+      conf: Number(result.confidence || 0)
+    };
 
-    // Keep dashboard/case tracking working
+    // Show the real Gemini response
+    addMsg(result.reply, 'bot', meta);
+
+    // Build the operations case using Gemini classification
     currentCase = {
-      cat: r.c,
-      esc: r.p === 'High' || r.conf < 85,
+      cat: result.category || 'Other',
+      p: result.priority || 'Medium',
+      conf: Number(result.confidence || 0),
+      esc: Boolean(result.escalate),
+      res: !Boolean(result.escalate),
+
+      reason:
+        result.escalation_reason ||
+        'No escalation required',
+
+      route:
+        result.route_to ||
+        'Customer Support',
+
+      next:
+        result.next_action ||
+        'Review case',
+
       csat: null,
-      aht: null,
-      res: !(r.p === 'High' || r.conf < 85),
-      p: r.p,
-      conf: r.conf,
-      next: r.next
+      aht: null
     };
 
     updateCaseBox();
@@ -231,7 +244,48 @@ ${q}`
   }
 }
 document.getElementById('sendBtn').onclick=send;document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{document.getElementById('chatInput').value=b.dataset.q;send()});
-function updateCaseBox(){if(!currentCase)return;const b=document.getElementById('caseBox');b.innerHTML=`<div class="case-row"><span>Category</span><b>${currentCase.cat}</b></div><div class="case-row"><span>Priority</span><b>${currentCase.p}</b></div><div class="case-row"><span>Confidence</span><b>${currentCase.conf}%</b></div><div class="case-row"><span>Status</span><b>${currentCase.res?'AI resolved':'Needs human review'}</b></div><div class="case-row"><span>Next action</span><b>${currentCase.next}</b></div>`;}
+function updateCaseBox() {
+  if (!currentCase) return;
+
+  const b = document.getElementById('caseBox');
+
+  b.innerHTML = `
+    <div class="case-row">
+      <span>Category</span>
+      <b>${currentCase.cat}</b>
+    </div>
+
+    <div class="case-row">
+      <span>Priority</span>
+      <b>${currentCase.p}</b>
+    </div>
+
+    <div class="case-row">
+      <span>Confidence</span>
+      <b>${currentCase.conf}%</b>
+    </div>
+
+    <div class="case-row">
+      <span>Status</span>
+      <b>${currentCase.esc ? 'Needs human review' : 'AI resolved'}</b>
+    </div>
+
+    <div class="case-row">
+      <span>Route to</span>
+      <b>${currentCase.route}</b>
+    </div>
+
+    <div class="case-row">
+      <span>Escalation reason</span>
+      <b>${currentCase.reason}</b>
+    </div>
+
+    <div class="case-row">
+      <span>Next action</span>
+      <b>${currentCase.next}</b>
+    </div>
+  `;
+}
 document.getElementById('resolveBtn').onclick=()=>{if(!currentCase)return;currentCase.res=true;currentCase.esc=false;cases.push({...currentCase});updateCaseBox();};document.getElementById('escalateBtn').onclick=()=>{if(!currentCase)return;currentCase.res=false;currentCase.esc=true;cases.push({...currentCase});updateCaseBox();};
 
 function stats(){const n=cases.length, esc=cases.filter(x=>x.esc).length,res=n-esc, csat=cases.reduce((s,x)=>s+x.csat,0)/n,aht=cases.reduce((s,x)=>s+x.aht,0)/n,hours=(res*2.8)/60;return {n,esc,res,rate:res/n*100,er:esc/n*100,csat,aht,hours};}
