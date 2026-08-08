@@ -171,7 +171,65 @@ async function askHomeOpsAI(message) {
 
   return data.reply;
 }
-  function send(){const inp=document.getElementById('chatInput');const q=inp.value.trim();if(!q)return;addMsg(q,'user');inp.value='';const brand=document.getElementById('brandSelect').value;const r=classify(q,brand);setTimeout(()=>{addMsg(r.answer+(r.src?`<div class="source">Public source: <a href="${r.src}" target="_blank">open guidance</a></div>`:''),'bot',r);currentCase={cat:r.c,esc:r.p==='High'||r.conf<85,csat:4.2,aht:3.4,res:!(r.p==='High'||r.conf<85),p:r.p,conf:r.conf,next:r.next};updateCaseBox();},250)}
+  async function send() {
+  const inp = document.getElementById('chatInput');
+  const q = inp.value.trim();
+
+  if (!q) return;
+
+  // Show student's message
+  addMsg(q, 'user');
+  inp.value = '';
+
+  const brand = document.getElementById('brandSelect').value;
+  const sendBtn = document.getElementById('sendBtn');
+
+  // Keep existing classification temporarily for dashboard metadata.
+  // We will replace this with AI classification in the next upgrade.
+  const r = classify(q, brand);
+
+  try {
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Thinking...';
+
+    // Send the real question to Gemini through the secure Cloudflare Worker
+    const aiReply = await askHomeOpsAI(
+      `Student housing platform context: ${brand}
+
+Student question:
+${q}`
+    );
+
+    // Display Gemini's real response
+    addMsg(aiReply, 'bot', r);
+
+    // Keep dashboard/case tracking working
+    currentCase = {
+      cat: r.c,
+      esc: r.p === 'High' || r.conf < 85,
+      csat: null,
+      aht: null,
+      res: !(r.p === 'High' || r.conf < 85),
+      p: r.p,
+      conf: r.conf,
+      next: r.next
+    };
+
+    updateCaseBox();
+
+  } catch (error) {
+    console.error(error);
+
+    addMsg(
+      'Sorry, HomeOps AI could not generate a response right now. Please try again.',
+      'bot'
+    );
+
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send';
+  }
+}
 document.getElementById('sendBtn').onclick=send;document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{document.getElementById('chatInput').value=b.dataset.q;send()});
 function updateCaseBox(){if(!currentCase)return;const b=document.getElementById('caseBox');b.innerHTML=`<div class="case-row"><span>Category</span><b>${currentCase.cat}</b></div><div class="case-row"><span>Priority</span><b>${currentCase.p}</b></div><div class="case-row"><span>Confidence</span><b>${currentCase.conf}%</b></div><div class="case-row"><span>Status</span><b>${currentCase.res?'AI resolved':'Needs human review'}</b></div><div class="case-row"><span>Next action</span><b>${currentCase.next}</b></div>`;}
 document.getElementById('resolveBtn').onclick=()=>{if(!currentCase)return;currentCase.res=true;currentCase.esc=false;cases.push({...currentCase});updateCaseBox();};document.getElementById('escalateBtn').onclick=()=>{if(!currentCase)return;currentCase.res=false;currentCase.esc=true;cases.push({...currentCase});updateCaseBox();};
