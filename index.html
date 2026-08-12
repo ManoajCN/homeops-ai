@@ -42,7 +42,12 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
     <section id="support" class="section active">
       <div class="grid g2">
         <div class="card chat-wrap">
-          <div class="toolbar"><div><h3>AI support assistant</h3><div class="small">Grounded demo using public housing-platform help content</div></div><select id="brandSelect"><option>HousingAnywhere</option><option>Studapart</option></select></div>
+          <div class="toolbar">
+  <div>
+    <h3>AI support assistant</h3>
+    <div class="small">Independent student-housing Marketplace Operations demo</div>
+  </div>
+</div>
           <div class="messages" id="messages">
             <div class="msg bot">Hi — I’m the HomeOps support prototype. Ask me about payments, cancellation, verification, deposits, contracts or suspicious rental requests.</div>
           </div>
@@ -387,19 +392,20 @@ if (oldCsat) oldCsat.remove();
   addMsg(q, 'user');
   inp.value = '';
 
-  const brand = document.getElementById('brandSelect').value;
+ 
   const sendBtn = document.getElementById('sendBtn');
 
   try {
     sendBtn.disabled = true;
     sendBtn.textContent = 'Thinking...';
 
-    const result = await askHomeOpsAI(
-      `Student housing platform context: ${brand}
+   const result = await askHomeOpsAI(
+  `Independent student-housing marketplace support context.
 
 Student question:
+
 ${q}`
-    );
+);
 
     const meta = {
       c: result.category || 'Other',
