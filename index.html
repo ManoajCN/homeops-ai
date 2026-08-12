@@ -477,20 +477,33 @@ function renderLiveSession() {
 
         <table class="table">
           <thead>
-            <tr>
-              <th>Category</th>
-              <th>Priority</th>
-              <th>Outcome</th>
-              <th>Route</th>
-              <th>CSAT</th>
-            </tr>
+           <tr>
+            <th>Journey</th>
+            <th>Strategic Theme</th>
+            <th>Customer Issue</th>
+            <th>Priority</th>
+            <th>Outcome</th>
+            <th>Route</th>
+            <th>CSAT</th>
+          </tr>
           </thead>
 
           <tbody>
 
             ${latestCases.map(x => `
               <tr>
-                <td>${x.category || '—'}</td>
+                <tr>
+
+                  <td>${x.journey || '—'}</td>
+
+                      <td>${x.theme || '—'}</td>
+                    
+                      <td>
+                        <b>${x.category || '—'}</b>
+                        <div class="small" style="margin-top:3px">
+                          ${x.friction || '—'}
+                        </div>
+                      </td>
 
                 <td>
                   <span class="priority ${x.priority}">
