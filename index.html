@@ -361,7 +361,20 @@ function rateCsat(score) {
       <span>Category</span>
       <b>${currentCase.cat}</b>
     </div>
+<div class="case-row">
+  <span>Journey Stage</span>
+  <b>${currentCase.journey || '—'}</b>
+</div>
 
+<div class="case-row">
+  <span>Strategic Theme</span>
+  <b>${currentCase.theme || '—'}</b>
+</div>
+
+<div class="case-row">
+  <span>Customer Friction</span>
+  <b>${currentCase.friction || '—'}</b>
+</div>
     <div class="case-row">
       <span>Priority</span>
       <b>${currentCase.p}</b>
