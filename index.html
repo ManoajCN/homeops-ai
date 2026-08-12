@@ -174,7 +174,10 @@ const titles={support:['Student Support AI','Turn housing questions into structu
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');document.getElementById('pageTitle').textContent=titles[b.dataset.tab][0];document.getElementById('pageSub').textContent=titles[b.dataset.tab][1]; if(b.dataset.tab==='dashboard'){
   renderDashboard();
   renderLiveSession();
-} if(b.dataset.tab==='product')renderBacklog(); if(b.dataset.tab==='brief')renderBrief();});
+} if(b.dataset.tab==='product'){
+  renderBacklog();
+  renderLiveProductSignals();
+} if(b.dataset.tab==='brief')renderBrief();});
 
 function classify(q,brand){const t=q.toLowerCase();let c='General support',p='Medium',conf=86,next='Provide guided answer',answer='I can help structure this request and point you to the relevant public guidance.',src='';
  if(/outside|scam|fraud|pay.*landlord|bank transfer/.test(t)){c='Payments & fraud';p='High';conf=96;next='Do not pay; flag for risk review if needed';answer= brand==='HousingAnywhere' ? 'Do not send the first month’s rent outside HousingAnywhere. Public guidance says the first month should be paid through the platform to keep payment protections. If a landlord is pressuring you to pay outside the platform, stop and use the platform’s support route.' : 'Keep payments inside the Studapart booking flow where applicable and do not bypass the platform for booking-related payments. If the request looks suspicious, pause and contact support.';src=brand==='HousingAnywhere'?'https://answers.housinganywhere.com/en/articles/2498804-what-should-i-do-if-a-landlord-asks-me-to-pay-the-first-month-s-rent-outside-housinganywhere':'https://help.studapart.com/en/articles/5182839-what-are-the-services-and-rules-of-studapart';}
@@ -768,7 +771,11 @@ function closeModal(){document.getElementById('modal').classList.remove('open')}
 
 function renderBrief(){const s=stats(),g=group(),top=g[0],hi=[...g].sort((a,b)=>b.er-a.er)[0];document.getElementById('weeklyBrief').textContent=`WEEKLY MARKETPLACE OPERATIONS BRIEF — DEMO\n\n1. What changed\n• ${s.n} synthetic support cases reviewed.\n• AI resolution rate: ${s.rate.toFixed(0)}%; escalation rate: ${s.er.toFixed(0)}%.\n• Average CSAT: ${s.csat.toFixed(1)}/5; average handling time: ${s.aht.toFixed(1)} minutes.\n• Estimated manual effort avoided: ${s.hours.toFixed(1)} hours.\n\n2. Main customer pain point\n• ${top.cat} is the highest-volume issue (${top.n} cases).\n• ${hi.cat} has the highest escalation rate (${hi.er.toFixed(0)}%).\n\n3. Recommended action\n• ${improve(hi.cat)}.\n• Add structured case tagging and capture why the AI escalates.\n• Review the change next week against resolution rate, escalation rate and CSAT.\n\n4. Product & Tech priority\n• Convert the ${hi.cat.toLowerCase()} pattern into a clear backlog item with acceptance criteria and measurable operational impact.\n\n5. Operating-model opportunity\n• Standardise case tags, escalation ownership and knowledge-update cadence across locations to reduce manual hand-offs and improve consistency.\n\nNote: All metrics in this prototype are synthetic and used only to demonstrate the operating model.`;}
 document.getElementById('regenBrief').onclick=renderBrief;
-renderDashboard();renderBacklog();renderBrief();
+renderDashboard();
+renderLiveSession();
+renderBacklog();
+renderLiveProductSignals();
+renderBrief();
 </script>
 </body>
 </html>
