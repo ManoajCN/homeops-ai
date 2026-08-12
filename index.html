@@ -562,7 +562,206 @@ function group(){const m={};cases.forEach(x=>{m[x.cat]??={n:0,esc:0,cs:0};m[x.ca
 function renderDashboard(){const s=stats();const vals=[['Cases this week',s.n,'+8% vs demo baseline'],['AI resolution rate',s.rate.toFixed(0)+'%','Target >75%'],['Escalation rate',s.er.toFixed(0)+'%','Lower is better'],['CSAT',s.csat.toFixed(1)+'/5','Quality guardrail'],['Avg handling time',s.aht.toFixed(1)+' min','Across all cases'],['Estimated hours saved',s.hours.toFixed(1)+'h','AI-resolved cases']];document.getElementById('kpis').innerHTML=vals.map(v=>`<div class="card kpi"><div class="small">${v[0]}</div><div class="num">${v[1]}</div><div class="delta">${v[2]}</div></div>`).join('');const g=group(),max=Math.max(...g.map(x=>x.n));document.getElementById('reasonBars').innerHTML=g.map(x=>`<div class="bar-row"><span>${x.cat}</span><div class="bar"><i style="width:${x.n/max*100}%"></i></div><b>${x.n}</b></div>`).join('');const gaps=g.filter(x=>x.er>25).slice(0,5);document.querySelector('#gapTable tbody').innerHTML=gaps.map(x=>`<tr><td>${x.cat}</td><td>${x.n}</td><td>${x.er.toFixed(0)}%</td><td>${improve(x.cat)}</td></tr>`).join('');const top=g[0],hi=[...g].sort((a,b)=>b.er-a.er)[0];document.getElementById('opsInsights').innerHTML=`<div class="insight"><b>Volume:</b> ${top.cat} is the largest contact reason with ${top.n} cases.</div><div class="insight"><b>Escalation:</b> ${hi.cat} has the highest escalation rate at ${hi.er.toFixed(0)}%.</div><div class="insight"><b>Action:</b> Prioritise ${improve(hi.cat).toLowerCase()} and measure the next-week change in resolution rate and CSAT.</div>`;}
 function improve(cat){return ({'Deposits':'Create one deposit/payment explainer','Cancellation':'Simplify cancellation intake + article','Verification':'Add document examples before submission','Payments & fraud':'Add stronger payment-risk warning','Move-in issue':'Create guided evidence checklist','Contracts':'Add plain-language contract FAQ','Landlord communication':'Add response templates','Registration':'Add city-specific routing'})[cat]||'Improve knowledge article';}
 function priority(x){if(x.er>=35&&x.n>=10)return'High';if(x.er>=20||x.n>=15)return'Medium';return'Low'}
-function renderBacklog(){const g=group();document.querySelector('#backlogTable tbody').innerHTML=g.map((x,i)=>`<tr><td>${x.cat}</td><td>${x.n}</td><td>${x.er.toFixed(0)}%</td><td>${improve(x.cat)}</td><td><span class="priority ${priority(x)}">${priority(x)}</span></td><td><button class="btn secondary" onclick="openRequirement('${x.cat}')">Generate requirement</button></td></tr>`).join('');}
+function liveSignalRecommendation(x) {
+
+  const theme = x.theme || '';
+
+  if (theme === 'Trust & Safety') {
+    return 'Strengthen contextual risk warnings and structured Trust & Safety escalation at the relevant journey moment.';
+  }
+
+  if (theme === 'Qualification & Verification') {
+    return 'Improve conversational verification guidance, failure recovery and document-preparation support before human review.';
+  }
+
+  if (theme === 'Payment & Financial Protection') {
+    return 'Improve payment clarity, protected-payment guidance and proactive warnings before risky payment actions.';
+  }
+
+  if (theme === 'Booking Operations') {
+    return 'Reduce booking hand-offs with clearer next steps, structured case context and automation for repetitive operational work.';
+  }
+
+  if (theme === 'Post-Move Support') {
+    return 'Create structured post-move issue intake, evidence collection and routing to reduce manual coordination.';
+  }
+
+  return 'Improve guided next steps and self-service support at this customer friction point.';
+}
+
+
+function renderLiveProductSignals() {
+
+  const container =
+    document.getElementById('liveProductSignals');
+
+  if (!container) return;
+
+
+  if (!liveCases.length) {
+
+    container.innerHTML = `
+      <div class="small" style="padding:12px 0">
+        No live customer signals yet.
+        Complete a Student Support AI interaction and submit CSAT to create one.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const groups = {};
+
+
+  liveCases.forEach(x => {
+
+    const journey =
+      x.journey || 'Unclassified journey';
+
+    const theme =
+      x.theme || 'Customer Experience';
+
+    const friction =
+      x.friction || x.category || 'Customer friction';
+
+    const key =
+      `${journey}|${theme}|${friction}`;
+
+
+    if (!groups[key]) {
+
+      groups[key] = {
+
+        journey: journey,
+        theme: theme,
+        friction: friction,
+        category: x.category || 'Other',
+
+        cases: 0,
+        escalations: 0,
+
+        ratings: []
+      };
+    }
+
+
+    groups[key].cases += 1;
+
+
+    if (x.escalated) {
+      groups[key].escalations += 1;
+    }
+
+
+    if (
+      x.csat !== null &&
+      x.csat !== undefined &&
+      !isNaN(Number(x.csat))
+    ) {
+
+      groups[key].ratings.push(
+        Number(x.csat)
+      );
+    }
+
+  });
+
+
+  const signals =
+    Object.values(groups)
+      .sort(
+        (a,b) =>
+          b.cases - a.cases ||
+          b.escalations - a.escalations
+      );
+
+
+  container.innerHTML =
+    signals.map(x => {
+
+      const avgCsat =
+        x.ratings.length
+          ? (
+              x.ratings.reduce(
+                (a,b) => a + b,
+                0
+              ) / x.ratings.length
+            ).toFixed(1)
+          : null;
+
+
+      return `
+
+        <div class="insight"
+             style="margin-top:12px">
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:8px">
+
+            <div>
+              <b>${x.category}</b>
+            </div>
+
+            <span class="pill">
+              ${x.journey}
+            </span>
+
+          </div>
+
+
+          <div class="small">
+
+            <b>Strategic theme:</b>
+            ${x.theme}
+
+            <br>
+
+            <b>Customer friction:</b>
+            ${x.friction}
+
+            <br>
+
+            <b>Live cases:</b>
+            ${x.cases}
+
+            &nbsp;•&nbsp;
+
+            <b>Escalations:</b>
+            ${x.escalations}
+
+            ${avgCsat !== null
+              ? `&nbsp;•&nbsp;<b>CSAT:</b> ${avgCsat}/5`
+              : ''
+            }
+
+          </div>
+
+
+          <div style="margin-top:10px">
+
+            <b>Product & Operations opportunity</b>
+
+            <div style="margin-top:4px">
+
+              ${liveSignalRecommendation(x)}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join('');
+}
+  
+  function renderBacklog(){const g=group();document.querySelector('#backlogTable tbody').innerHTML=g.map((x,i)=>`<tr><td>${x.cat}</td><td>${x.n}</td><td>${x.er.toFixed(0)}%</td><td>${improve(x.cat)}</td><td><span class="priority ${priority(x)}">${priority(x)}</span></td><td><button class="btn secondary" onclick="openRequirement('${x.cat}')">Generate requirement</button></td></tr>`).join('');}
 function openRequirement(cat){const x=group().find(y=>y.cat===cat);const expected=Math.max(3,Math.round(x.esc*.35));document.getElementById('reqText').textContent=`Problem\n${x.n} ${cat.toLowerCase()} cases appear in the demo dataset, with ${x.er.toFixed(0)}% escalating to human support.\n\nOperational impact\nRepeated questions create avoidable handling time, inconsistent answers and additional hand-offs.\n\nProposed requirement\n${improve(cat)}. Add structured guidance before escalation and capture the reason when the AI cannot resolve the case.\n\nAcceptance criteria\n• Guidance is visible at the relevant point in the customer journey.\n• Unresolved cases are tagged consistently.\n• Human escalation includes conversation context and issue category.\n• Dashboard reports resolution rate and CSAT for this intent.\n\nSuccess measure\nTarget at least ${expected} fewer escalations per comparable case volume while maintaining CSAT ≥ 4.2/5.\n\nPriority\n${priority(x)}`;document.getElementById('modal').classList.add('open')}
 function openTopRequirement(){const x=[...group()].sort((a,b)=>{const p={High:3,Medium:2,Low:1};return p[priority(b)]-p[priority(a)]||b.n-a.n})[0];openRequirement(x.cat)}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
