@@ -1136,7 +1136,23 @@ This requirement is generated from live interactions within the portfolio demo a
       'Repeat contact detected — preserve previous case context for agent handoff';
   }
 
+if (
+  (urgency === 'urgent' || urgency === 'critical') &&
+  queue === 'Payments Support'
+) {
+  queue = 'Trust & Safety';
 
+  priority =
+    urgency === 'critical'
+      ? 'Critical'
+      : 'High';
+
+  escalation =
+    'Urgent payment-risk call — prioritise specialist human review';
+
+  overflow =
+    'Do not route to a general queue; maintain specialist escalation';
+}
   if (context === 'risk') {
 
     queue = 'Trust & Safety';
