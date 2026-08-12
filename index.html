@@ -26,7 +26,7 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
   📞 Telephony & IVR
 </button>
       <button data-tab="product">🧭 Product & Tech Priorities</button>
-      <button data-tab="model">🔁 Operating Model</button>
+      
       <button data-tab="brief">📝 Weekly Ops Brief</button>
       <button data-tab="about">ℹ️ About Prototype</button>
     </div>
@@ -187,25 +187,7 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
       <div class="card" style="margin-top:16px"><h3>Operations → Product/Tech workflow</h3><div class="flow"><span>Frontline question</span><b class="arrow">→</b><span>AI classification</span><b class="arrow">→</b><span>Recurring pattern</span><b class="arrow">→</b><span>Business requirement</span><b class="arrow">→</b><span>Prioritisation</span><b class="arrow">→</b><span>Adoption + KPI check</span></div></div>
     </section>
 
-    <section id="model" class="section">
-      <div class="grid g2">
-        <div class="card"><h3>Operating model comparison</h3><div class="small">Synthetic example of two locations moving toward one standard process.</div>
-          <table class="table"><thead><tr><th>Workflow</th><th>Rotterdam</th><th>Cergy</th></tr></thead><tbody>
-            <tr><td>Verification escalation</td><td>2 hand-offs</td><td>3 hand-offs</td></tr>
-            <tr><td>Cancellation intake</td><td>Structured form</td><td>Chat + manual triage</td></tr>
-            <tr><td>Knowledge updates</td><td>Weekly owner</td><td>Ad-hoc updates</td></tr>
-            <tr><td>Case tagging</td><td>6 standard tags</td><td>11 local tags</td></tr>
-          </tbody></table>
-        </div>
-        <div class="card"><h3>Recommended standard</h3>
-          <div class="insight"><b>Verification:</b> standardise to one 2-step escalation path with one accountable owner.</div>
-          <div class="insight"><b>Cancellation:</b> use one structured intake form before human review.</div>
-          <div class="insight"><b>Knowledge:</b> assign weekly article ownership and track unanswered intents.</div>
-          <div class="insight"><b>Case taxonomy:</b> consolidate local tags into 6 common Marketplace Operations categories.</div>
-        </div>
-      </div>
-      <div class="card" style="margin-top:16px"><h3>Potential impact</h3><div class="grid g3"><div class="kpi"><div class="small">Manual hand-offs</div><div class="num">−28%</div></div><div class="kpi"><div class="small">Process variants</div><div class="num">11 → 6</div></div><div class="kpi"><div class="small">Estimated weekly hours saved</div><div class="num">8.4h</div></div></div><div class="footer-note">Illustrative synthetic scenario — not company data.</div></div>
-    </section>
+
 
     <section id="brief" class="section">
       <div class="card"><div class="toolbar"><div><h3>AI-generated weekly management brief</h3><div class="small">Summarises what changed, why it matters and what management should do next.</div></div><button class="btn primary" id="regenBrief">Regenerate brief</button></div><div class="brief" id="weeklyBrief"></div></div>
@@ -214,7 +196,7 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
     <section id="about" class="section">
       <div class="grid g2">
         <div class="card"><h3>What this prototype demonstrates</h3><div class="bars">
-          <div>✓ AI-assisted support and issue classification</div><div>✓ Resolution / escalation design</div><div>✓ Operational KPI dashboard</div><div>✓ Knowledge-gap identification</div><div>✓ Product & Tech requirement generation</div><div>✓ Cross-location operating-model standardisation</div><div>✓ Management reporting and measurable outcomes</div>
+          <div>✓ AI-assisted support and issue classification</div><div>✓ Resolution / escalation design</div><div>✓ Operational KPI dashboard</div><div>✓ Knowledge-gap identification</div><div>✓ Product & Tech requirement generation</div><div>✓ Management reporting and measurable outcomes</div>
         </div></div>
         <div class="card"><h3>Data & sourcing</h3><p class="small" style="font-size:13px;line-height:1.6">All operational metrics, cases and location comparisons are synthetic and created only for this portfolio prototype. Housing policy examples are based on publicly available help-centre content. Always check the live platform terms before acting on a real rental case.</p>
           <div class="source"><b>Public reference examples:</b><br/>
@@ -241,7 +223,7 @@ let currentCase=null;
   let liveCases = JSON.parse(
   localStorage.getItem('homeopsLiveCases') || '[]'
 );
-const titles={support:['Student Support AI','Turn housing questions into structured cases, resolutions and operational insight.'],dashboard:['Marketplace Operations Dashboard','See resolution quality, workload, escalation patterns and knowledge gaps.'],product:['Product & Tech Priorities','Turn recurring customer pain points into clear requirements and priorities.'],model:['Operating Model','Compare workflows across locations and propose one scalable standard.'],brief:['Weekly Ops Brief','Give managers a concise, data-led view of what changed and what to do next.'],about:['About Prototype','Independent portfolio project using public sources and synthetic operational data.']};
+const titles={support:['Student Support AI','Turn housing questions into structured cases, resolutions and operational insight.'],dashboard:['Marketplace Operations Dashboard','See resolution quality, workload, escalation patterns and knowledge gaps.'],product:['Product & Tech Priorities','Turn recurring customer pain points into clear requirements and priorities.'],brief:['Weekly Ops Brief','Give managers a concise, data-led view of what changed and what to do next.'],about:['About Prototype','Independent portfolio project using public sources and synthetic operational data.']};
 
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');document.getElementById('pageTitle').textContent=titles[b.dataset.tab][0];document.getElementById('pageSub').textContent=titles[b.dataset.tab][1]; if(b.dataset.tab==='dashboard'){
   renderDashboard();
@@ -1082,7 +1064,7 @@ function openRequirement(cat){const x=group().find(y=>y.cat===cat);const expecte
 function openTopRequirement(){const x=[...group()].sort((a,b)=>{const p={High:3,Medium:2,Low:1};return p[priority(b)]-p[priority(a)]||b.n-a.n})[0];openRequirement(x.cat)}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 
-function renderBrief(){const s=stats(),g=group(),top=g[0],hi=[...g].sort((a,b)=>b.er-a.er)[0];document.getElementById('weeklyBrief').textContent=`WEEKLY MARKETPLACE OPERATIONS BRIEF — DEMO\n\n1. What changed\n• ${s.n} synthetic support cases reviewed.\n• AI resolution rate: ${s.rate.toFixed(0)}%; escalation rate: ${s.er.toFixed(0)}%.\n• Average CSAT: ${s.csat.toFixed(1)}/5; average handling time: ${s.aht.toFixed(1)} minutes.\n• Estimated manual effort avoided: ${s.hours.toFixed(1)} hours.\n\n2. Main customer pain point\n• ${top.cat} is the highest-volume issue (${top.n} cases).\n• ${hi.cat} has the highest escalation rate (${hi.er.toFixed(0)}%).\n\n3. Recommended action\n• ${improve(hi.cat)}.\n• Add structured case tagging and capture why the AI escalates.\n• Review the change next week against resolution rate, escalation rate and CSAT.\n\n4. Product & Tech priority\n• Convert the ${hi.cat.toLowerCase()} pattern into a clear backlog item with acceptance criteria and measurable operational impact.\n\n5. Operating-model opportunity\n• Standardise case tags, escalation ownership and knowledge-update cadence across locations to reduce manual hand-offs and improve consistency.\n\nNote: All metrics in this prototype are synthetic and used only to demonstrate the operating model.`;}
+function renderBrief(){const s=stats(),g=group(),top=g[0],hi=[...g].sort((a,b)=>b.er-a.er)[0];document.getElementById('weeklyBrief').textContent=`WEEKLY MARKETPLACE OPERATIONS BRIEF — DEMO\n\n1. What changed\n• ${s.n} synthetic support cases reviewed.\n• AI resolution rate: ${s.rate.toFixed(0)}%; escalation rate: ${s.er.toFixed(0)}%.\n• Average CSAT: ${s.csat.toFixed(1)}/5; average handling time: ${s.aht.toFixed(1)} minutes.\n• Estimated manual effort avoided: ${s.hours.toFixed(1)} hours.\n\n2. Main customer pain point\n• ${top.cat} is the highest-volume issue (${top.n} cases).\n• ${hi.cat} has the highest escalation rate (${hi.er.toFixed(0)}%).\n\n3. Recommended action\n• ${improve(hi.cat)}.\n• Add structured case tagging and capture why the AI escalates.\n• Review the change next week against resolution rate, escalation rate and CSAT.\n\n4. Product & Tech priority\n• Convert the ${hi.cat.toLowerCase()} pattern into a clear backlog item with acceptance criteria and measurable operational impact.\n\nNote: All metrics in this prototype are synthetic and used only for portfolio demonstration purposes.`;}
 document.getElementById('regenBrief').onclick=renderBrief;
 renderDashboard();
 renderLiveSession();
