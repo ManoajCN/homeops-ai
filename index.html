@@ -343,45 +343,6 @@ function rateCsat(score) {
     `;
   }
 }
-  function addCsatPrompt() {
-  const d = document.createElement('div');
-  d.className = 'msg bot';
-  d.id = 'csatPrompt';
-
-  d.innerHTML = `
-    <div style="margin-bottom:8px;font-weight:600">
-      Was this response helpful?
-    </div>
-
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn secondary" onclick="rateCsat(1)">1 ⭐</button>
-      <button class="btn secondary" onclick="rateCsat(2)">2 ⭐</button>
-      <button class="btn secondary" onclick="rateCsat(3)">3 ⭐</button>
-      <button class="btn secondary" onclick="rateCsat(4)">4 ⭐</button>
-      <button class="btn secondary" onclick="rateCsat(5)">5 ⭐</button>
-    </div>
-  `;
-
-  document.getElementById('messages').appendChild(d);
-  d.scrollIntoView({ behavior: 'smooth' });
-}
-
-function rateCsat(score) {
-  if (!currentCase) return;
-
-  currentCase.csat = score;
-
-  const prompt = document.getElementById('csatPrompt');
-
-  if (prompt) {
-    prompt.innerHTML = `
-      <b>Thanks for the feedback.</b>
-      <div class="small" style="margin-top:5px">
-        CSAT recorded: ${score}/5
-      </div>
-    `;
-  }
-}
   function updateCaseBox() {
   if (!currentCase) return;
 
