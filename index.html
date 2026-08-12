@@ -467,7 +467,6 @@ ${q}`
 
     currentCase = {
       question: q,
-brand: brand,
 createdAt: new Date().toISOString(),
       cat: result.category || 'Other',
       journey: result.journey_stage || 'Unknown',
@@ -518,7 +517,6 @@ function saveLiveCase() {
 
   const liveCase = {
     question: currentCase.question,
-    brand: currentCase.brand,
     category: currentCase.cat,
 
 journey: currentCase.journey,
