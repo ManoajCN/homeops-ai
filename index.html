@@ -345,14 +345,66 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.quer
   renderLiveProductSignals();
 } if(b.dataset.tab==='brief')renderBrief();});
 
-function classify(q,brand){const t=q.toLowerCase();let c='General support',p='Medium',conf=86,next='Provide guided answer',answer='I can help structure this request and point you to the relevant public guidance.',src='';
- if(/outside|scam|fraud|pay.*landlord|bank transfer/.test(t)){c='Payments & fraud';p='High';conf=96;next='Do not pay; flag for risk review if needed';answer= brand==='HousingAnywhere' ? 'Do not send the first month’s rent outside HousingAnywhere. Public guidance says the first month should be paid through the platform to keep payment protections. If a landlord is pressuring you to pay outside the platform, stop and use the platform’s support route.' : 'Keep payments inside the Studapart booking flow where applicable and do not bypass the platform for booking-related payments. If the request looks suspicious, pause and contact support.';src=brand==='HousingAnywhere'?'https://answers.housinganywhere.com/en/articles/2498804-what-should-i-do-if-a-landlord-asks-me-to-pay-the-first-month-s-rent-outside-housinganywhere':'https://help.studapart.com/en/articles/5182839-what-are-the-services-and-rules-of-studapart';}
- else if(/cancel|refund/.test(t)){c='Cancellation';p='Medium';conf=92;next='Check booking policy and submit official cancellation route';answer=brand==='HousingAnywhere'?'Your refund depends on the applicable cancellation policy, timing and reason. HousingAnywhere’s public guidance says cancellation should be submitted through the official “Cancel Rental” flow in the booking conversation, with supporting evidence where relevant.':'Studapart’s public guidance says cancellation requests are started through the chatbot, followed by the cancellation form and supporting documents. Refund eligibility depends on the reason and timing.';src=brand==='HousingAnywhere'?'https://answers.housinganywhere.com/en/articles/2185219-cancellation-policies-for-tenants':'https://help.studapart.com/en/articles/395311-how-to-cancel-your-reservation-at-studapart';}
- else if(/verify|verification|identity|id/.test(t)){c='Verification';p='Medium';conf=94;next='Guide verification; escalate repeated failure';answer=brand==='HousingAnywhere'?'HousingAnywhere requires email and mobile verification to contact landlords and book; ID verification is optional but can increase trust. The public help centre says ID checks use Stripe and may require a government-issued ID and selfie. If verification repeatedly fails, follow the troubleshooting guidance or use the supported document-sharing route.':'Studapart’s Guaranteed Profile involves verification of identity and supporting documents. If a verification or document step is blocked, route the case to support with the exact document/error details.';src=brand==='HousingAnywhere'?'https://answers.housinganywhere.com/en/articles/2498701-verifying-your-profile-on-housinganywhere':'https://help.studapart.com/en/articles/3010730-what-is-studapart-s-guaranteed-profile';}
- else if(/not as advertised|arrived|move.?in|uninhabitable/.test(t)){c='Move-in issue';p='High';conf=91;next='Collect evidence and escalate promptly';answer=brand==='HousingAnywhere'?'If the place is not as advertised, document the issue immediately with photos/videos and use the platform’s official cancellation/support process. HousingAnywhere’s public guidance describes a 48-hour move-in protection window for certain problems, so timing matters.':'Document the issue immediately and contact Studapart support through the platform. Cancellation/refund handling depends on the reason and timing, so supporting evidence is important.';src=brand==='HousingAnywhere'?'https://answers.housinganywhere.com/en/articles/2270144-secure-payment-system-for-tenants':'https://help.studapart.com/en/articles/395311-how-to-cancel-your-reservation-at-studapart';}
- else if(/deposit/.test(t)){c='Deposits';p='Medium';conf=82;next='Clarify who collects deposit and booking terms';answer='Deposit rules vary by booking type, landlord/residence and local contract terms. Check the listing/booking conditions and whether the payment is handled on-platform. If the request conflicts with the documented booking terms, escalate for review.';}
- else if(/contract|lease/.test(t)){c='Contracts';p='Medium';conf=80;next='Check signed terms; escalate legal interpretation';answer='Check the signed rental terms, dates, parties, payment obligations and cancellation clauses first. I can summarise the operational next step, but legal interpretation should be escalated to a qualified human or the platform support team.';}
- return {c,p,conf,next,answer,src};}
+function classify(q){
+  const t = q.toLowerCase();
+
+  let c = 'General support';
+  let p = 'Medium';
+  let conf = 86;
+  let next = 'Provide guided answer';
+  let answer = 'I can help structure this request and suggest the appropriate operational next step.';
+  let src = '';
+
+  if (/outside|scam|fraud|pay.*landlord|bank transfer/.test(t)) {
+    c = 'Payments & fraud';
+    p = 'High';
+    conf = 96;
+    next = 'Pause payment and escalate for risk review';
+    answer = 'Do not proceed with an unusual or off-platform payment request. Pause the transaction, document the request and route the case for risk review if needed.';
+  }
+
+  else if (/cancel|refund/.test(t)) {
+    c = 'Cancellation';
+    p = 'Medium';
+    conf = 92;
+    next = 'Review booking terms and route cancellation request';
+    answer = 'Cancellation and refund outcomes depend on the booking terms, timing and reason. Capture the relevant case details and follow the marketplace cancellation workflow.';
+  }
+
+  else if (/verify|verification|identity|id/.test(t)) {
+    c = 'Verification';
+    p = 'Medium';
+    conf = 94;
+    next = 'Guide verification and escalate repeated failure';
+    answer = 'Check which verification step is blocked, capture the exact error or missing information and escalate repeated failures with the relevant case context.';
+  }
+
+  else if (/not as advertised|arrived|move.?in|uninhabitable/.test(t)) {
+    c = 'Move-in issue';
+    p = 'High';
+    conf = 91;
+    next = 'Collect evidence and escalate promptly';
+    answer = 'Document the issue with clear evidence, record when it was identified and route the case promptly for review based on the applicable booking and support process.';
+  }
+
+  else if (/deposit/.test(t)) {
+    c = 'Deposits';
+    p = 'Medium';
+    conf = 82;
+    next = 'Clarify deposit terms and payment responsibility';
+    answer = 'Check the documented deposit terms, payment responsibility and booking conditions. Escalate if the request conflicts with the agreed terms.';
+  }
+
+  else if (/contract|lease/.test(t)) {
+    c = 'Contracts';
+    p = 'Medium';
+    conf = 80;
+    next = 'Review agreement and escalate interpretation if needed';
+    answer = 'Check the signed agreement, dates, parties, payment obligations and cancellation terms. Escalate legal interpretation or unclear contractual issues to the appropriate human team.';
+  }
+
+  return {c,p,conf,next,answer,src};
+}
 
 function addMsg(text,who,meta){const d=document.createElement('div');d.className='msg '+who;d.innerHTML=text+(meta?`<div class="meta"><span class="pill">${meta.c}</span><span class="pill ${meta.p==='High'?'bad':meta.p==='Medium'?'warn':'good'}">${meta.p} priority</span><span class="pill good">${meta.conf}% confidence</span></div>`:'');document.getElementById('messages').appendChild(d);d.scrollIntoView({behavior:'smooth'});}
 async function askHomeOpsAI(message) {
