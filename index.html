@@ -770,6 +770,67 @@ function renderLiveProductSignals() {
 
     }).join('');
 }
+
+function generateLiveRequirement(encodedSignal) {
+
+  const x = JSON.parse(
+    decodeURIComponent(encodedSignal)
+  );
+
+  const avgCsat =
+    Array.isArray(x.ratings) && x.ratings.length
+      ? (
+          x.ratings.reduce((a,b) => a + b, 0) /
+          x.ratings.length
+        ).toFixed(1)
+      : null;
+
+  const requirement = liveSignalRecommendation(x);
+
+  const text = `
+LIVE PRODUCT REQUIREMENT — DEMO SIGNAL
+
+Problem statement
+Students are experiencing "${x.friction}" during the ${x.journey} stage of the rental journey.
+
+Issue category
+${x.category}
+
+Strategic theme
+${x.theme}
+
+User story
+As a student in the ${x.journey} stage, I want clear and safe guidance when I experience ${x.friction.toLowerCase()}, so that I can continue my rental journey with more confidence and fewer unnecessary hand-offs.
+
+Product requirement
+${requirement}
+
+Acceptance criteria
+• The experience recognises this friction at the relevant customer-journey stage.
+• The student receives a clear recommended next action.
+• High-risk or unresolved cases can be escalated to the appropriate operational team.
+• Escalated cases include category, journey stage, strategic theme and conversation context.
+• The interaction is captured for Operations monitoring and Product/Tech analysis.
+• Resolution, escalation and CSAT can be reviewed after implementation.
+
+Expected operational impact
+Reduce avoidable support hand-offs, improve consistency of guidance and make recurring customer friction easier for Operations and Product teams to identify.
+
+Evidence from live demo
+• Live interactions: ${x.cases}
+• Human escalations: ${x.escalations}
+${avgCsat !== null ? `• CSAT: ${avgCsat}/5` : ''}
+
+Note
+This requirement is generated from live interactions within the portfolio demo and should be treated as an operational signal, not validated production customer research.
+`;
+
+  document.getElementById('reqText').textContent = text;
+
+  document
+    .getElementById('modal')
+    .classList.add('open');
+}
   
   function renderBacklog(){const g=group();document.querySelector('#backlogTable tbody').innerHTML=g.map((x,i)=>`<tr><td>${x.cat}</td><td>${x.n}</td><td>${x.er.toFixed(0)}%</td><td>${improve(x.cat)}</td><td><span class="priority ${priority(x)}">${priority(x)}</span></td><td><button class="btn secondary" onclick="openRequirement('${x.cat}')">Generate requirement</button></td></tr>`).join('');}
 function openRequirement(cat){const x=group().find(y=>y.cat===cat);const expected=Math.max(3,Math.round(x.esc*.35));document.getElementById('reqText').textContent=`Problem\n${x.n} ${cat.toLowerCase()} cases appear in the demo dataset, with ${x.er.toFixed(0)}% escalating to human support.\n\nOperational impact\nRepeated questions create avoidable handling time, inconsistent answers and additional hand-offs.\n\nProposed requirement\n${improve(cat)}. Add structured guidance before escalation and capture the reason when the AI cannot resolve the case.\n\nAcceptance criteria\n• Guidance is visible at the relevant point in the customer journey.\n• Unresolved cases are tagged consistently.\n• Human escalation includes conversation context and issue category.\n• Dashboard reports resolution rate and CSAT for this intent.\n\nSuccess measure\nTarget at least ${expected} fewer escalations per comparable case volume while maintaining CSAT ≥ 4.2/5.\n\nPriority\n${priority(x)}`;document.getElementById('modal').classList.add('open')}
