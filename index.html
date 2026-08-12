@@ -22,6 +22,9 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
     <div class="nav">
       <button class="active" data-tab="support">💬 Student Support AI</button>
       <button data-tab="dashboard">📊 Ops Dashboard</button>
+      <button class="nav-item" data-tab="telephony">
+  📞 Telephony & IVR
+</button>
       <button data-tab="product">🧭 Product & Tech Priorities</button>
       <button data-tab="model">🔁 Operating Model</button>
       <button data-tab="brief">📝 Weekly Ops Brief</button>
@@ -89,7 +92,28 @@ button,input,select,textarea{font:inherit}.app{display:grid;grid-template-column
       </div>
       <div class="card" style="margin-top:16px"><h3>Operations insight</h3><div id="opsInsights"></div></div>
     </section>
+<section id="telephony" class="section">
 
+  <div class="page-head">
+    <div>
+      <h1>Telephony & IVR Operations</h1>
+      <p>
+        Simulate call routing, queue configuration and operational hand-offs for student support.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Incoming Call Simulator</h3>
+
+    <div class="small">
+      Route a support call based on customer intent, urgency and operational risk.
+    </div>
+
+    <div id="telephonySimulator" style="margin-top:16px"></div>
+  </div>
+
+</section>
     <section id="product" class="section">
       <div class="card" style="margin-bottom:16px">
 
